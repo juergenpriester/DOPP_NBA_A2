@@ -52,14 +52,14 @@ def combine_on_gameid(df) -> pd.DataFrame:
     if 'TEAM_NAME' in df.columns:
         df = df.drop(columns=['TEAM_NAME'], inplace=False)
 
-    df_home = df[df['HOME'] == 1]
-    df_away = df[df['HOME'] == 0]
-    df_home = df_home.drop(columns=['HOME'], inplace=False)
-    df_away = df_away.drop(columns=['HOME', 'SEASON_YEAR', 'GAME_DATE', 'WL'], inplace=False)
+    df_HOME = df[df['HOME'] == 1]
+    df_AWAY = df[df['HOME'] == 0]
+    df_HOME = df_HOME.drop(columns=['HOME'], inplace=False)
+    df_AWAY = df_AWAY.drop(columns=['HOME', 'SEASON_YEAR', 'GAME_DATE', 'WL'], inplace=False)
 
-    df_merged = df_home.merge(df_away, on='GAME_ID', suffixes=('_home', '_away'))
+    df_merged = df_HOME.merge(df_AWAY, on='GAME_ID', suffixes=('_HOME', '_AWAY'))
 
-    df_merged.set_index(['SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_home', 'TEAM_ID_away'], inplace=True)
+    df_merged.set_index(['SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_HOME', 'TEAM_ID_AWAY'], inplace=True)
 
     return df_merged
 
