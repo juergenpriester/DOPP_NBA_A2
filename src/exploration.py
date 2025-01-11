@@ -5,7 +5,9 @@ import logging as log
 
 from utils import check_create_dir
 
-log.basicConfig(level=log.INFO)
+log.basicConfig(level=log.INFO,
+                format='%(asctime)s: %(levelname)s: %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def plot_correlation_matrix(df: pd.DataFrame):
