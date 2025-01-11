@@ -37,6 +37,8 @@ def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
             df[col] = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'])[col].transform(
                 lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
 
+    # add number of wins
+
     # Drop first window_size rows for each team
     df = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR']).apply(
         lambda x: x.iloc[window_size:],
@@ -47,21 +49,28 @@ def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
 
 
 def combine_on_gameid(df) -> pd.DataFrame:
+    if 'TEAM_NAME' in df.columns:
+        df = df.drop(columns=['TEAM_NAME'], inplace=False)
+
     df_home = df[df['HOME'] == 1]
     df_away = df[df['HOME'] == 0]
     df_home = df_home.drop(columns=['HOME'], inplace=False)
-    df_away = df_away.drop(columns=['HOME', 'SEASON_YEAR', 'GAME_DATE'], inplace=False)
+    df_away = df_away.drop(columns=['HOME', 'SEASON_YEAR', 'GAME_DATE', 'WL'], inplace=False)
 
-    df = df_home.merge(df_away, on='GAME_ID', suffixes=('_home', '_away'))
-    df.set_index(['GAME_ID', 'GAME_DATE'], inplace=True)
+    df_merged = df_home.merge(df_away, on='GAME_ID', suffixes=('_home', '_away'))
 
-    return df
+    df_merged.set_index(['SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_home', 'TEAM_ID_away'], inplace=True)
+
+    return df_merged
 
 
 def main():
     log.info("Loading data from csv")
     df = load_from_csv('data/nba_data.csv')
     log.info(df.head())
+
+    log.info("GP_Rank")
+    log.info(df['GP_RANK'])
 
     COLUMNS = DEFAULT_COLUMNS + NUMERIC_COLUMNS
     df = df[COLUMNS]
@@ -76,17 +85,17 @@ def main():
     df.sort_values(by=['GAME_DATE', 'GAME_ID'], inplace=True)
     log.info("Data types after conversion")
     log.info(df.dtypes)
-    log.info(df.head())
+
     df.to_csv(DATA_DIR + 'nba_data_coverted.csv', index=False)
 
     df = aggregate_team_stats(df, AGG_WINDOW_SIZE)
 
-    log.info(df.head())
-
     df.to_csv(DATA_DIR + 'nba_data_aggregated.csv', index=False)
 
-    # df = combine_on_gameid(df)
-    # log.info(df.head())
+    df = combine_on_gameid(df)
+    log.info(df.head())
+
+    df.to_csv(DATA_DIR + 'nba_data_combined.csv', index=True)
 
 
 if __name__ == '__main__':
