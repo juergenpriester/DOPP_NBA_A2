@@ -1,7 +1,8 @@
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, GridSearchCV, cross_validate
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def train_model(data):
@@ -44,6 +45,18 @@ def train_model(data):
     # Calculate the f1 score of the model
     f1 = f1_score(y_test, y_pred, average='weighted')
     print(f"F1 Score: {f1}")
+
+    # Plot feature importance
+    feature_importances = best_clf.feature_importances_
+    features = X.columns
+    indices = feature_importances.argsort()[::-1]
+
+    plt.figure(figsize=(10, 6))
+    plt.title("Feature Importances")
+    plt.bar(range(X.shape[1]), feature_importances[indices], align="center")
+    plt.xticks(range(X.shape[1]), features[indices], rotation=90)
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == '__main__':
