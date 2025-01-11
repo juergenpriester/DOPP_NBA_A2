@@ -4,7 +4,7 @@ import logging as log
 
 from utils import check_create_dir, load_from_csv
 
-from constants import DATA_DIR, SEASONS, DEFAULT_COLUMNS, NUMERIC_COLUMNS, AGG_WINDOW_SIZE, WIN_PCT_COLUMN
+from constants import DATA_DIR, SEASONS, DEFAULT_COLUMNS, NUMERIC_COLUMNS, AGG_WINDOW_SIZES, WIN_PCT_COLUMN
 
 log.basicConfig(level=log.INFO)
 
@@ -27,16 +27,23 @@ def convert_dtypes(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
+def compute_rolling_values(df: pd.DataFrame, window_size: int, agg_function=lambda x: np.mean(x)) -> pd.DataFrame:
+    for col in NUMERIC_COLUMNS:
+        if col in df.columns:
+            colname = col + '_AGG_' + str(window_size)
+            df[colname] = df.groupby(['TEAM_ID'])[col].transform(
+                lambda x: x.shift(1).rolling(window=window_size, min_periods=1).agg(agg_function))
+    return df
+
+
+def aggregate_team_stats(df: pd.DataFrame) -> pd.DataFrame:
     # sort by date
     df = df.sort_values(by=['GAME_DATE'])
 
-    # group by team and season
-    for col in NUMERIC_COLUMNS:
-        if col in df.columns:
-            df[col] = df.groupby(['TEAM_ID', 'SEASON_YEAR'])[col].transform(
-                lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
+    for window_size in AGG_WINDOW_SIZES:
+        df = compute_rolling_values(df, window_size, agg_function=lambda x: np.mean(x))
 
+    df = df.drop(columns=NUMERIC_COLUMNS, inplace=False)
     # Calculate season long win percentage
     df[WIN_PCT_COLUMN] = df.groupby(['TEAM_ID', 'SEASON_YEAR'])['WL'].transform(
         lambda x: x.shift(1).rolling(window=9999, min_periods=1).mean())
@@ -90,7 +97,7 @@ def main():
 
     df.to_csv(DATA_DIR + 'nba_data_converted.csv', index=False)
 
-    df = aggregate_team_stats(df, AGG_WINDOW_SIZE)
+    df = aggregate_team_stats(df)
 
     df.to_csv(DATA_DIR + 'nba_data_aggregated.csv', index=False)
 
