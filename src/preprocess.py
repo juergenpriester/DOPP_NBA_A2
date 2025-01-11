@@ -34,16 +34,16 @@ def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
     # group by team and season
     for col in NUMERIC_COLUMNS:
         if col in df.columns:
-            df[col] = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'])[col].transform(
+            df[col] = df.groupby(['TEAM_ID', 'SEASON_YEAR'])[col].transform(
                 lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
 
     # add number of wins
 
     # Drop first window_size rows for each team
-    df = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR']).apply(
+    df = df.groupby(['TEAM_ID', 'SEASON_YEAR']).apply(
         lambda x: x.iloc[window_size:],
         include_groups=False
-    ).reset_index(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'], drop=False)
+    ).reset_index(['TEAM_ID', 'SEASON_YEAR'], drop=False)
 
     return df
 
