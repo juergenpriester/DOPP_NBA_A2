@@ -22,8 +22,12 @@ def plot_feature_importance(model, X):
 
 def plot_prediction_hist(y_test, y_pred):
     # Plot histogram of predictions
-    plt.hist(y_pred, bins=20, alpha=0.5, label='Predictions')
-    plt.hist(y_test, bins=20, alpha=0.5, label='True')
+    width = 0.25
+    bins = np.arange(len(np.unique(y_test))) - width / 2
+
+    plt.bar(bins - width, np.bincount(y_test), width=width, alpha=0.5, label='True')
+    plt.bar(bins + width, np.bincount(y_pred), width=width, alpha=0.5, label='Predictions')
+    plt.xticks(bins, np.unique(y_test))
     plt.legend(loc='upper right')
     plt.show()
 
