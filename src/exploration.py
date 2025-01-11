@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import logging as log
 
+from utils import check_create_dir
+
 log.basicConfig(level=log.INFO)
 
 
@@ -29,6 +31,7 @@ def plot_correlation_to_target(df: pd.DataFrame, target_column: str):
 
 
 def main():
+    check_create_dir('plots')
     df = pd.read_csv('data/nba_data_combined.csv')
     log.info("Percentage of home wins")
     log.info(np.round(df['WL'].mean(), 4))
