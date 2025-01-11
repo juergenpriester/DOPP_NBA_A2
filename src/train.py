@@ -81,6 +81,7 @@ def train_model(data, seed=42):
     print(f"Recall: {recall}")
 
     plot_feature_importance(best_clf, X)
+    plot_prediction_hist(y_test, y_pred)
 
 
 if __name__ == '__main__':
