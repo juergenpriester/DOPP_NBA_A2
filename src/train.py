@@ -1,6 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -49,6 +49,14 @@ def train_model(data, seed=42):
     # Calculate the f1 score of the model
     f1 = f1_score(y_test, y_pred, average='weighted')
     print(f"F1 Score: {f1}")
+
+    # Calculate the precision of the model
+    precision = precision_score(y_test, y_pred, average='weighted')
+    print(f"Precision: {precision}")
+
+    # Calculate the recall of the model
+    recall = recall_score(y_test, y_pred, average='weighted')
+    print(f"Recall: {recall}")
 
     # Plot feature importance
     feature_importances = best_clf.feature_importances_
