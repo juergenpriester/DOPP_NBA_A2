@@ -3,11 +3,15 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 
-def train_model(data):
+def train_model(data, seed=42):
+    # Set the random seed for reproducibility
+    np.random.seed(seed)
+
     # Create a random forest classifier
-    clf = RandomForestClassifier(random_state=42)
+    clf = RandomForestClassifier(random_state=seed)
 
     # Define the parameter grid
     param_grid = {
@@ -22,7 +26,7 @@ def train_model(data):
     y = data['WL']
 
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=seed)
 
     # Perform grid search with cross-validation
     grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, scoring='accuracy', cv=5, n_jobs=-1)
