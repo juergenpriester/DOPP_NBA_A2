@@ -6,23 +6,17 @@ from utils import check_create_dir
 from constants import DATA_DIR, SEASONS
 
 
-
 def load_from_api(seasons: list[str]) -> pd.DataFrame:
     df = pd.DataFrame()
     for season in seasons:
         gamedatapull = TeamGameLogs(
-                league_id_nullable ='00', # nba 00, g_league 20, wnba 10
-                season_type_nullable = 'Regular Season', # Regular Season, Playoffs, Pre Season
-                season_nullable = season
-            )
-            
-        df_season = gamedatapull.get_data_frames()[0]    
-        df = pd.concat([df, df_season]) 
-    return df
+            league_id_nullable='00',  # nba 00, g_league 20, wnba 10
+            season_type_nullable='Regular Season',  # Regular Season, Playoffs, Pre Season
+            season_nullable=season
+        )
 
-
-def load_from_csv(path: str) -> pd.DataFrame:
-    df = pd.read_csv(path)
+        df_season = gamedatapull.get_data_frames()[0]
+        df = pd.concat([df, df_season])
     return df
 
 
