@@ -20,8 +20,10 @@ def convert_dtypes(df: pd.DataFrame) -> pd.DataFrame:
     df['HOME'] = df['MATCHUP'].str.contains(r'\bvs\b').astype(int)
     df.drop(columns=['MATCHUP'], inplace=True)
     df['WL'] = df['WL'].map({'W': 1, 'L': 0}).astype(int)
-    df['PTS'] = df['PTS'].astype(float)
-    df['PLUS_MINUS'] = df['PLUS_MINUS'].astype(float)
+    for col in NUMERIC_COLUMNS:
+        if col in df.columns:
+            if (df[col].dtype == 'int64' or df[col].dtype == 'float64') and col in df.columns:
+                df[col] = df[col].astype(float)
     return df
 
 
@@ -39,20 +41,20 @@ def combine_on_gameid(df) -> pd.DataFrame:
 
 def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
     # sort by date
-    # group by team
+    df = df.sort_values(by=['GAME_DATE'])
+
+    # group by team and season
     for col in NUMERIC_COLUMNS:
         if col in df.columns:
-            if (df[col].dtype == 'int64' or df[col].dtype == 'float64') and col in df.columns:
-                df[col] = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'])['WL'].transform(lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
+            df[col] = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'])[col].transform(
+                lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
 
-    # df['WL'] = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'])['WL'].transform(lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
-    # df['PTS'] = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'])['PTS'].transform(lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
-    # df['PLUS_MINUS'] = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'])['PLUS_MINUS'].transform(lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
+    log.info(df.head())
 
     # Drop first window_size rows for each team
     df = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR']).apply(
-        lambda x: x.iloc[window_size:], include_groups=False
-    ).reset_index(drop=False)
+        lambda x: x.iloc[window_size:]
+    ).reset_index(drop=True)
 
     return df
 
@@ -83,6 +85,8 @@ def main():
     # log.info(df.head())
 
     df = aggregate_team_stats(df, AGG_WINDOW_SIZE)
+
+    log.info(df.head())
 
     df.to_csv(DATA_DIR + 'nba_data_cleaned.csv', index=False)
 
