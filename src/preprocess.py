@@ -88,7 +88,7 @@ def main():
     log.info("Data types after conversion")
     log.info(df.dtypes)
 
-    df.to_csv(DATA_DIR + 'nba_data_coverted.csv', index=False)
+    df.to_csv(DATA_DIR + 'nba_data_converted.csv', index=False)
 
     df = aggregate_team_stats(df, AGG_WINDOW_SIZE)
 
