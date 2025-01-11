@@ -81,14 +81,14 @@ def main():
 
     df.to_csv(DATA_DIR + 'nba_data_coverted.csv', index=False)
 
-    # df = combine_on_gameid(df)
-    # log.info(df.head())
-
     df = aggregate_team_stats(df, AGG_WINDOW_SIZE)
 
     log.info(df.head())
 
-    df.to_csv(DATA_DIR + 'nba_data_cleaned.csv', index=False)
+    df.to_csv(DATA_DIR + 'nba_data_aggregated.csv', index=False)
+
+    # df = combine_on_gameid(df)
+    # log.info(df.head())
 
 
 if __name__ == '__main__':
