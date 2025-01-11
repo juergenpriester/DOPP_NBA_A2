@@ -37,7 +37,7 @@ def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
             df[col] = df.groupby(['TEAM_ID', 'SEASON_YEAR'])[col].transform(
                 lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
 
-    # Calculate win percentage
+    # Calculate season long win percentage
     df[WIN_PCT_COLUMN] = df.groupby(['TEAM_ID', 'SEASON_YEAR'])['WL'].transform(
         lambda x: x.shift(1).rolling(window=9999, min_periods=1).mean())
 

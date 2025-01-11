@@ -1,0 +1,51 @@
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_validate
+from sklearn.metrics import accuracy_score, f1_score
+import pandas as pd
+
+
+def train_model(data):
+    # Create a random forest classifier
+    clf = RandomForestClassifier(random_state=42)
+
+    # Define the parameter grid
+    param_grid = {
+        'n_estimators': [50, 100, 200],
+        'max_depth': [3, 5, 7, 10, None],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4]
+    }
+
+    # Split the data into features and target
+    X = data.drop(columns=['WL', 'SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_HOME', 'TEAM_ID_AWAY'], inplace=False)
+    y = data['WL']
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Perform grid search with cross-validation
+    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, scoring='accuracy', cv=5, n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+
+    # Get the best estimator
+    best_clf = grid_search.best_estimator_
+    print(f"Best parameters found: {grid_search.best_params_}")
+
+    # Fit the model on the training data
+    best_clf.fit(X_train, y_train)
+
+    # Make predictions on the test data
+    y_pred = best_clf.predict(X_test)
+
+    # Calculate the accuracy of the model
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Accuracy: {accuracy}")
+
+    # Calculate the f1 score of the model
+    f1 = f1_score(y_test, y_pred, average='weighted')
+    print(f"F1 Score: {f1}")
+
+
+if __name__ == '__main__':
+    data = pd.read_csv('data/nba_data_combined.csv')
+    train_model(data)
