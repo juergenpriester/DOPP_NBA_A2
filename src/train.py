@@ -47,15 +47,15 @@ def train_model(data, seed=42):
     print(f"Accuracy: {accuracy}")
 
     # Calculate the f1 score of the model
-    f1 = f1_score(y_test, y_pred, average='weighted')
+    f1 = f1_score(y_test, y_pred, average='binary')
     print(f"F1 Score: {f1}")
 
     # Calculate the precision of the model
-    precision = precision_score(y_test, y_pred, average='weighted')
+    precision = precision_score(y_test, y_pred, average='binary')
     print(f"Precision: {precision}")
 
     # Calculate the recall of the model
-    recall = recall_score(y_test, y_pred, average='weighted')
+    recall = recall_score(y_test, y_pred, average='binary')
     print(f"Recall: {recall}")
 
     # Plot feature importance
