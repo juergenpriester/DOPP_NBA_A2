@@ -11,7 +11,7 @@ def load_from_api():
     gamedatapull = TeamGameLogs(
             league_id_nullable ='00', # nba 00, g_league 20, wnba 10
             team_id_nullable = '', # can specify a specific team_id
-            season_nullable = '2023-24',
+#            season_nullable = '2023-24',
             season_type_nullable = 'Regular Season' # Regular Season, Playoffs, Pre Season
         )
         
