@@ -6,6 +6,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def plot_feature_importance(model, X):
+    # Plot feature importance
+    feature_importances = model.feature_importances_
+    features = X.columns
+    indices = feature_importances.argsort()[::-1]
+
+    plt.figure(figsize=(10, 6))
+    plt.title("Feature Importances")
+    plt.bar(range(X.shape[1]), feature_importances[indices], align="center")
+    plt.xticks(range(X.shape[1]), features[indices], rotation=90)
+    plt.tight_layout()
+    plt.show()
+
+
 def train_model(data, seed=42):
     # Set the random seed for reproducibility
     np.random.seed(seed)
@@ -58,17 +72,7 @@ def train_model(data, seed=42):
     recall = recall_score(y_test, y_pred, average='binary')
     print(f"Recall: {recall}")
 
-    # Plot feature importance
-    feature_importances = best_clf.feature_importances_
-    features = X.columns
-    indices = feature_importances.argsort()[::-1]
-
-    plt.figure(figsize=(10, 6))
-    plt.title("Feature Importances")
-    plt.bar(range(X.shape[1]), feature_importances[indices], align="center")
-    plt.xticks(range(X.shape[1]), features[indices], rotation=90)
-    plt.tight_layout()
-    plt.show()
+    plot_feature_importance(best_clf, X)
 
 
 if __name__ == '__main__':
