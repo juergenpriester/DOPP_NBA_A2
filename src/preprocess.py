@@ -27,18 +27,6 @@ def convert_dtypes(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def combine_on_gameid(df) -> pd.DataFrame:
-    df_home = df[df['HOME'] == 1]
-    df_away = df[df['HOME'] == 0]
-    df_home = df_home.drop(columns=['HOME'], inplace=False)
-    df_away = df_away.drop(columns=['HOME', 'SEASON_YEAR', 'GAME_DATE'], inplace=False)
-
-    df = df_home.merge(df_away, on='GAME_ID', suffixes=('_home', '_away'))
-    df.set_index(['GAME_ID', 'GAME_DATE'], inplace=True)
-
-    return df
-
-
 def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
     # sort by date
     df = df.sort_values(by=['GAME_DATE'])
@@ -53,7 +41,19 @@ def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
     df = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR']).apply(
         lambda x: x.iloc[window_size:],
         include_groups=False
-    ).reset_index(drop=True)
+    ).reset_index(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'], drop=False)
+
+    return df
+
+
+def combine_on_gameid(df) -> pd.DataFrame:
+    df_home = df[df['HOME'] == 1]
+    df_away = df[df['HOME'] == 0]
+    df_home = df_home.drop(columns=['HOME'], inplace=False)
+    df_away = df_away.drop(columns=['HOME', 'SEASON_YEAR', 'GAME_DATE'], inplace=False)
+
+    df = df_home.merge(df_away, on='GAME_ID', suffixes=('_home', '_away'))
+    df.set_index(['GAME_ID', 'GAME_DATE'], inplace=True)
 
     return df
 
