@@ -4,7 +4,7 @@ import logging as log
 
 from utils import check_create_dir, load_from_csv
 
-from constants import DATA_DIR, SEASONS, DEFAULT_COLUMNS, NUMERIC_COLUMNS, AGG_WINDOW_SIZE
+from constants import DATA_DIR, SEASONS, DEFAULT_COLUMNS, NUMERIC_COLUMNS, AGG_WINDOW_SIZE, WIN_PCT_COLUMN
 
 log.basicConfig(level=log.INFO)
 
@@ -37,7 +37,9 @@ def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
             df[col] = df.groupby(['TEAM_ID', 'SEASON_YEAR'])[col].transform(
                 lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
 
-    # add number of wins
+    # Calculate win percentage
+    df[WIN_PCT_COLUMN] = df.groupby(['TEAM_ID', 'SEASON_YEAR'])['WL'].transform(
+        lambda x: x.shift(1).rolling(window=9999, min_periods=1).mean())
 
     # Drop first window_size rows for each team
     df = df.groupby(['TEAM_ID', 'SEASON_YEAR']).apply(
