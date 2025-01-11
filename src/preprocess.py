@@ -49,11 +49,10 @@ def aggregate_team_stats(df: pd.DataFrame, window_size) -> pd.DataFrame:
             df[col] = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR'])[col].transform(
                 lambda x: x.shift(1).rolling(window=window_size, min_periods=1).mean())
 
-    log.info(df.head())
-
     # Drop first window_size rows for each team
     df = df.groupby(['TEAM_ID', 'TEAM_NAME', 'SEASON_YEAR']).apply(
-        lambda x: x.iloc[window_size:]
+        lambda x: x.iloc[window_size:],
+        include_groups=False
     ).reset_index(drop=True)
 
     return df
@@ -78,7 +77,6 @@ def main():
     log.info("Data types after conversion")
     log.info(df.dtypes)
     log.info(df.head())
-
     df.to_csv(DATA_DIR + 'nba_data_coverted.csv', index=False)
 
     df = aggregate_team_stats(df, AGG_WINDOW_SIZE)
