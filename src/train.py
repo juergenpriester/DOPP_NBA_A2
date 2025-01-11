@@ -20,6 +20,14 @@ def plot_feature_importance(model, X):
     plt.show()
 
 
+def plot_prediction_hist(y_test, y_pred):
+    # Plot histogram of predictions
+    plt.hist(y_pred, bins=20, alpha=0.5, label='Predictions')
+    plt.hist(y_test, bins=20, alpha=0.5, label='True')
+    plt.legend(loc='upper right')
+    plt.show()
+
+
 def train_model(data, seed=42):
     # Set the random seed for reproducibility
     np.random.seed(seed)
