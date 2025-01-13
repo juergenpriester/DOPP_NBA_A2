@@ -13,18 +13,22 @@ def create_team_mapping(df: pd.DataFrame):
     pass
 
 
-def convert_dtypes(df: pd.DataFrame) -> pd.DataFrame:
+def convert_dtypes(df: pd.DataFrame, numeric_cols=None) -> pd.DataFrame:
+    df = df.copy()
     df['SEASON_YEAR'] = df['SEASON_YEAR'].str[:4].astype(int)
     df['TEAM_NAME'] = df['TEAM_NAME'].astype('string')
     df['GAME_DATE'] = pd.to_datetime(df['GAME_DATE'])
     df['HOME'] = df['MATCHUP'].str.contains(r'\bvs\b').astype(int)
     df.drop(columns=['MATCHUP'], inplace=True)
     df['WL'] = df['WL'].map({'W': 1, 'L': 0}).astype(int)
-    for col in NUMERIC_COLUMNS:
-        if col in df.columns:
-            if (df[col].dtype == 'int64' or df[col].dtype == 'float64') and col in df.columns:
-                df[col] = df[col].astype(float)
-    return df
+    if numeric_cols:
+        for col in numeric_cols:
+            if col in df.columns:
+                if (df[col].dtype == 'int64' or df[col].dtype == 'float64') and col in df.columns:
+                    df[col] = df[col].astype(float)
+        return df
+    else:
+        return df
 
 
 def compute_rolling_values(df: pd.DataFrame, window_size: int, agg_function=lambda x: np.mean(x)) -> pd.DataFrame:
@@ -78,8 +82,13 @@ def main():
     df = load_from_csv('data/nba_data.csv')
     log.info(df.head())
 
-    log.info("GP_Rank")
-    log.info(df['GP_RANK'])
+    # drop variables that end with "_RANK"
+    df = df.loc[:, ~df.columns.str.endswith('_RANK')]
+    df = df.drop(columns=['AVAILABLE_FLAG'], inplace=False)
+
+    # create data with all columns converted to appropriate data types
+    df_full_converted = convert_dtypes(df)
+    df_full_converted.to_csv(DATA_DIR + 'nba_data_full_converted.csv', index=False)
 
     COLUMNS = DEFAULT_COLUMNS + NUMERIC_COLUMNS
     df = df[COLUMNS]
@@ -90,7 +99,7 @@ def main():
 
     log.info("Data types before conversion")
     log.info(df.dtypes)
-    df = convert_dtypes(df)
+    df = convert_dtypes(df, NUMERIC_COLUMNS)
     df.sort_values(by=['GAME_DATE', 'GAME_ID'], inplace=True)
     log.info("Data types after conversion")
     log.info(df.dtypes)

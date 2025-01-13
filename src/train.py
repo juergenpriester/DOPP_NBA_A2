@@ -4,6 +4,40 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import logging as log
+
+from constants import DATA_DIR, PLOTS_DIR
+from utils import check_create_dir
+
+EVAL_DIR = PLOTS_DIR + '/evaluation'
+check_create_dir(EVAL_DIR)
+
+
+log.basicConfig(level=log.INFO)
+
+
+def calc_metrics(y_test, y_pred):
+    accuracy = accuracy_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, average='binary')
+    precision = precision_score(y_test, y_pred, average='binary')
+    recall = recall_score(y_test, y_pred, average='binary')
+    metrics = {
+        'accuracy': accuracy,
+        'f1': f1,
+        'precision': precision,
+        'recall': recall
+    }
+    log.info(f"Metrics: {metrics}")
+    return metrics
+
+
+def plot_proba_hist(y_prob):
+    # Plot histogram of probabilities
+    plt.hist(y_prob[:, 1], bins=20)
+    plt.xlabel('Probability of win')
+    plt.ylabel('Frequency')
+    plt.savefig(EVAL_DIR+"/probability_histogram.png")
+    plt.close()
 
 
 def plot_feature_importance(model, X):
@@ -17,7 +51,8 @@ def plot_feature_importance(model, X):
     plt.bar(range(X.shape[1]), feature_importances[indices], align="center")
     plt.xticks(range(X.shape[1]), features[indices], rotation=90)
     plt.tight_layout()
-    plt.show()
+    plt.savefig(EVAL_DIR+"/feature_importance.png")
+    plt.close()
 
 
 def plot_prediction_hist(y_test, y_pred):
@@ -29,10 +64,11 @@ def plot_prediction_hist(y_test, y_pred):
     plt.bar(bins + width, np.bincount(y_pred), width=width, alpha=0.5, label='Predictions')
     plt.xticks(bins, np.unique(y_test))
     plt.legend(loc='upper right')
-    plt.show()
+    plt.savefig(EVAL_DIR+"/prediction_histogram.png")
+    plt.close()
 
 
-def train_model(data, seed=42):
+def train_model(data: pd.DataFrame, seed=42):
     # Set the random seed for reproducibility
     np.random.seed(seed)
 
@@ -41,10 +77,10 @@ def train_model(data, seed=42):
 
     # Define the parameter grid
     param_grid = {
-        'n_estimators': [50, 100, 200],
-        'max_depth': [3, 5, 7, 10, None],
-        'min_samples_split': [2, 5, 10],
-        'min_samples_leaf': [1, 2, 4]
+        'n_estimators': [200],
+        'max_depth': [10],
+        'min_samples_split': [5],
+        'min_samples_leaf': [1]
     }
 
     # Split the data into features and target
@@ -67,27 +103,16 @@ def train_model(data, seed=42):
 
     # Make predictions on the test data
     y_pred = best_clf.predict(X_test)
+    y_prob = best_clf.predict_proba(X_test)
 
-    # Calculate the accuracy of the model
-    accuracy = accuracy_score(y_test, y_pred)
-    print(f"Accuracy: {accuracy}")
-
-    # Calculate the f1 score of the model
-    f1 = f1_score(y_test, y_pred, average='binary')
-    print(f"F1 Score: {f1}")
-
-    # Calculate the precision of the model
-    precision = precision_score(y_test, y_pred, average='binary')
-    print(f"Precision: {precision}")
-
-    # Calculate the recall of the model
-    recall = recall_score(y_test, y_pred, average='binary')
-    print(f"Recall: {recall}")
+    metrics = calc_metrics(y_test, y_pred)
 
     plot_feature_importance(best_clf, X)
     plot_prediction_hist(y_test, y_pred)
+    plot_proba_hist(y_prob)
 
 
 if __name__ == '__main__':
     data = pd.read_csv('data/nba_data_combined.csv')
+    log.info(f"Shape of data: {data.shape}")
     train_model(data)
