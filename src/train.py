@@ -46,9 +46,9 @@ def plot_proba_hist(y_prob):
 
 def plot_feature_importance(model, X):
     # Plot feature importance
-    try:
+    if hasattr(model, 'feature_importances_'):
         feature_importances = model.feature_importances_
-    except Warning:
+    else:
         log.info("Model does not have feature_importances_ attribute")
         return
     features = X.columns
@@ -153,9 +153,9 @@ if __name__ == '__main__':
     data = pd.read_csv('data/nba_data_combined.csv')
     log.info(f"Shape of data: {data.shape}")
 
-    clf = LogisticRegression(random_state=SEED)
+    # clf = LogisticRegression(random_state=SEED)
     # clf = RandomForestClassifier(random_state=SEED)
-    # clf = GradientBoostingClassifier(random_state=SEED)
+    clf = GradientBoostingClassifier(random_state=SEED)
     # Define the parameter grid
     param_grid = {
         'n_estimators': [200],
