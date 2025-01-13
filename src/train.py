@@ -12,7 +12,6 @@ from constants import DATA_DIR, PLOTS_DIR
 from utils import check_create_dir
 
 EVAL_DIR = PLOTS_DIR + '/evaluation'
-check_create_dir(EVAL_DIR)
 SEED = 42
 np.random.seed(SEED)
 
@@ -46,14 +45,19 @@ def plot_proba_hist(y_prob):
 
 def plot_feature_importance(model, X):
     # Plot feature importance
-    feature_importances = model.feature_importances_
+    try:
+        feature_importances = model.feature_importances_
+    except Warning:
+        log.info("Model does not have feature_importances_ attribute")
+        return
     features = X.columns
     indices = feature_importances.argsort()[::-1]
+    indices = indices[:10]
 
     plt.figure(figsize=(10, 6))
     plt.title("Feature Importances")
-    plt.bar(range(X.shape[1]), feature_importances[indices], align="center")
-    plt.xticks(range(X.shape[1]), features[indices], rotation=90)
+    plt.bar(range(len(indices)), feature_importances[indices], align="center")
+    plt.xticks(range(len(indices)), features[indices], rotation=90)
     plt.tight_layout()
     plt.savefig(EVAL_DIR+"/feature_importance.png")
     plt.close()
@@ -148,8 +152,8 @@ if __name__ == '__main__':
     data = pd.read_csv('data/nba_data_combined.csv')
     log.info(f"Shape of data: {data.shape}")
 
-    # clf = RandomForestClassifier(random_state=SEED)
-    clf = GradientBoostingClassifier(random_state=SEED)
+    clf = RandomForestClassifier(random_state=SEED)
+    # clf = GradientBoostingClassifier(random_state=SEED)
     # Define the parameter grid
     param_grid = {
         'n_estimators': [200],
@@ -157,5 +161,7 @@ if __name__ == '__main__':
         'min_samples_split': [5],
         'min_samples_leaf': [1]
     }
+    EVAL_DIR = EVAL_DIR + "/" + type(clf).__name__
+    check_create_dir(EVAL_DIR)
 
     train_model(clf, data)
