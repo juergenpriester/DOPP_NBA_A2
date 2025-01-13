@@ -1,6 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_recall_curve, precision_score, recall_score, roc_curve
 import xgboost as xgb
 from sklearn.ensemble import GradientBoostingClassifier
 import pandas as pd
@@ -72,6 +72,36 @@ def plot_prediction_hist(y_test, y_pred):
     plt.close()
 
 
+def plot_confusion_matrix(y_test, y_pred):
+    cm = confusion_matrix(y_test, y_pred)
+    plt.matshow(cm, cmap=plt.cm.Blues)
+    plt.colorbar()
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.savefig(EVAL_DIR+"/confusion_matrix.png")
+    plt.close()
+
+
+def plot_roc_curve(y_test, y_prob):
+    fpr, tpr, thresholds = roc_curve(y_test, y_prob[:, 1])
+    plt.plot(fpr, tpr)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+    plt.savefig(EVAL_DIR+"/roc_curve.png")
+    plt.close()
+
+
+def plot_precision_recall_curve(y_test, y_prob):
+    precision, recall, thresholds = precision_recall_curve(y_test, y_prob[:, 1])
+    plt.plot(recall, precision)
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title('Precision-Recall Curve')
+    plt.savefig(EVAL_DIR+"/precision_recall_curve.png")
+    plt.close()
+
+
 def perform_grid_search(clf, param_grid, X_train, y_train):
     grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, scoring='accuracy', cv=5, n_jobs=-1)
     grid_search.fit(X_train, y_train)
@@ -105,6 +135,9 @@ def train_model(clf, data: pd.DataFrame, param_grid=None):
     plot_feature_importance(best_clf, X)
     plot_prediction_hist(y_test, y_pred)
     plot_proba_hist(y_prob)
+    plot_confusion_matrix(y_test, y_pred)
+    plot_roc_curve(y_test, y_prob)
+    plot_precision_recall_curve(y_test, y_prob)
 
 
 if __name__ == '__main__':

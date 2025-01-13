@@ -62,22 +62,6 @@ def plot_wins_over_teams(df: pd.DataFrame):
     plt.close()
 
 
-def factors(n):
-    return set(reduce(
-        list.__add__,
-        ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
-
-
-def get_subplot_sizes(n):
-    factors_list = np.array(list(factors(8)))
-    max_cols = 4
-    factors_list = factors_list[factors_list <= max_cols]
-    if len(factors_list) == 1:
-        return factors_list[0], 1
-    else:
-        return factors_list[-1], n//factors_list[-1]
-
-
 def plot_scatter(df: pd.DataFrame):
     df = df.copy()
     df = df[['WL', 'PTS', 'FG_PCT', 'FT_PCT', 'FG3_PCT', 'AST', 'REB', 'TOV', 'STL', 'BLK', 'PLUS_MINUS']]
