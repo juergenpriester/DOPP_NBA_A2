@@ -1,4 +1,5 @@
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_recall_curve, precision_score, recall_score, roc_curve
 import xgboost as xgb
@@ -152,7 +153,8 @@ if __name__ == '__main__':
     data = pd.read_csv('data/nba_data_combined.csv')
     log.info(f"Shape of data: {data.shape}")
 
-    clf = RandomForestClassifier(random_state=SEED)
+    clf = LogisticRegression(random_state=SEED)
+    # clf = RandomForestClassifier(random_state=SEED)
     # clf = GradientBoostingClassifier(random_state=SEED)
     # Define the parameter grid
     param_grid = {

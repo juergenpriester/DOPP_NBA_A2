@@ -15,12 +15,16 @@
     - [x] Combined Home and Away statistics
 
 - [ ] Model Training and Evaluation 
-    - [x] Added simple CV pipeline and evaluation metrics
+    - [ ] Added simple CV pipeline with hyperparameter tuning
+        - [x] Logistic Regression
+        - [x] Random Forest
+        - [x] Gradient Boosting
+    - [ ] Feature Selection
 
     - Evaluation Plots
         - [x] Confusion Matrix
         - [x] ROC Curve
-        - [ ] Precision-Recall Curve
+        - [x] Precision-Recall Curve
         - [x] Feature Importance (if given by model)
         - [x] Histogram of ground truth and predictions
         - 
