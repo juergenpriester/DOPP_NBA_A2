@@ -75,6 +75,10 @@ def plot_prediction_hist(y_test, y_pred):
 def plot_confusion_matrix(y_test, y_pred):
     cm = confusion_matrix(y_test, y_pred)
     plt.matshow(cm, cmap=plt.cm.Blues)
+    # add values in plot
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            plt.text(x=j, y=i, s=cm[i, j], va='center', ha='center')
     plt.colorbar()
     plt.xlabel('Predicted')
     plt.ylabel('True')
