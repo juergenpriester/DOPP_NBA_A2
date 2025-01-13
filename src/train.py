@@ -1,6 +1,8 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+import xgboost as xgb
+from sklearn.ensemble import GradientBoostingClassifier
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,6 +13,8 @@ from utils import check_create_dir
 
 EVAL_DIR = PLOTS_DIR + '/evaluation'
 check_create_dir(EVAL_DIR)
+SEED = 42
+np.random.seed(SEED)
 
 
 log.basicConfig(level=log.INFO)
@@ -68,37 +72,28 @@ def plot_prediction_hist(y_test, y_pred):
     plt.close()
 
 
-def train_model(data: pd.DataFrame, seed=42):
-    # Set the random seed for reproducibility
-    np.random.seed(seed)
+def perform_grid_search(clf, param_grid, X_train, y_train):
+    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, scoring='accuracy', cv=5, n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+    best_clf = grid_search.best_estimator_
+    print(f"Best parameters found: {grid_search.best_params_}")
+    return best_clf
 
-    # Create a random forest classifier
-    clf = RandomForestClassifier(random_state=seed)
 
-    # Define the parameter grid
-    param_grid = {
-        'n_estimators': [200],
-        'max_depth': [10],
-        'min_samples_split': [5],
-        'min_samples_leaf': [1]
-    }
+def train_model(clf, data: pd.DataFrame, param_grid=None):
 
     # Split the data into features and target
     X = data.drop(columns=['WL', 'SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_HOME', 'TEAM_ID_AWAY'], inplace=False)
     y = data['WL']
 
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=seed)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
 
-    # Perform grid search with cross-validation
-    grid_search = GridSearchCV(estimator=clf, param_grid=param_grid, scoring='accuracy', cv=5, n_jobs=-1)
-    grid_search.fit(X_train, y_train)
+    if param_grid is not None:
+        best_clf = perform_grid_search(clf, param_grid, X_train, y_train)
+    else:
+        best_clf = clf
 
-    # Get the best estimator
-    best_clf = grid_search.best_estimator_
-    print(f"Best parameters found: {grid_search.best_params_}")
-
-    # Fit the model on the training data
     best_clf.fit(X_train, y_train)
 
     # Make predictions on the test data
@@ -115,4 +110,15 @@ def train_model(data: pd.DataFrame, seed=42):
 if __name__ == '__main__':
     data = pd.read_csv('data/nba_data_combined.csv')
     log.info(f"Shape of data: {data.shape}")
-    train_model(data)
+
+    # clf = RandomForestClassifier(random_state=SEED)
+    clf = GradientBoostingClassifier(random_state=SEED)
+    # Define the parameter grid
+    param_grid = {
+        'n_estimators': [200],
+        'max_depth': [10],
+        'min_samples_split': [5],
+        'min_samples_leaf': [1]
+    }
+
+    train_model(clf, data)
