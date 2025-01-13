@@ -24,6 +24,7 @@
         - [x] Random Forest
         - [x] Gradient Boosting
     - [ ] Feature Selection
+    - [ ] Scaling of Data
 
     - Evaluation Plots
         - [x] Confusion Matrix
