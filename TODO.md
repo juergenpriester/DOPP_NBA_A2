@@ -8,11 +8,15 @@
     - [x] Scatter Magtrix
     - [x] Correlation Matrix
     - [x] Correlation to target variable
+    - [ ] Additional Plots
 
 - [ ] Preprocessing
     - [x] Converted Datatypes
     - [x] Aggregated Game Statistics with rolling means
     - [x] Combined Home and Away statistics
+    - [ ] Maybe add additional data
+        - [ ] What data?
+        - [ ] Feature Engineering
 
 - [ ] Model Training and Evaluation 
     - [ ] Added simple CV pipeline with hyperparameter tuning
