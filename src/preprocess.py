@@ -181,6 +181,7 @@ def preprocess_injury_data():
         df.rename(columns={'PLAYER_ID': col + '_ID'}, inplace=True)
         log.info(df.shape)
     log.info(df.head())
+    log.info(f"Number of not nan values in Acquired_ID column {df['Acquired_ID'].notna().sum()}")
 
     df.to_csv(os.path.join(INJURY_DATA, 'injury_data_converted.csv'), index=False)
 
