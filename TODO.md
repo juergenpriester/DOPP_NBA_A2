@@ -16,6 +16,8 @@
     - [x] Combined Home and Away statistics
     - [ ] Maybe add additional data
         - [ ] What data?
+            - [ ] Injured/missing players impact score (advanced statstic maybe Box Plus Minus or Winshares (from stahead))
+            - [ ] Is a game the second one in a back to back (2 games in 2 days)?
         - [ ] Feature Engineering
 
 - [ ] Model Training and Evaluation 
