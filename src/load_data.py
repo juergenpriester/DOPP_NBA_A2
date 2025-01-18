@@ -21,6 +21,16 @@ def load_injury_data() -> pd.DataFrame:
     df.to_csv(os.path.join(INJURY_DATA, "injury_data.csv"), index=False)
 
 
+def load_advanced_stats() -> pd.DataFrame:
+    # Download latest version
+    path = kagglehub.dataset_download(
+        "jacquesoberweis/2016-2025-nba-player-advanced-season-stats"
+    )
+    print("Path to dataset files:", path)
+    df = pd.read_csv(os.path.join(path, "player_advanced.csv"))
+    df.to_csv(os.path.join(PLAYERLOG_DATA, "player_advanced.csv"), index=False)
+
+
 def load_playerlogs(seasons: list[str]) -> pd.DataFrame:
     df = pd.DataFrame()
     for season in seasons:
@@ -50,15 +60,17 @@ def load_teamlogs(seasons: list[str]) -> pd.DataFrame:
 
 
 def main():
-    load_injury_data()
-
     check_create_dir(DATA_DIR)
+    check_create_dir(INJURY_DATA)
     check_create_dir(TEAMLOG_DATA)
+    check_create_dir(PLAYERLOG_DATA)
+    load_injury_data()
+    load_advanced_stats()
+
     team_load_data = load_teamlogs(SEASONS)
     team_load_data.to_csv(os.path.join(TEAMLOG_DATA, "team_data.csv"), index=False)
     log.info("Team data loaded and saved to nba_data.csv")
 
-    check_create_dir(PLAYERLOG_DATA)
     player_log_data = load_playerlogs(SEASONS)
     player_log_data.to_csv(os.path.join(PLAYERLOG_DATA, "player_data.csv"), index=False)
     log.info("Player data loaded and saved to nba_player_data.csv")
