@@ -253,7 +253,7 @@ def merge_games_injuries():
     # df_team = df_team.explode('INJURED_PLAYERS_AWAY')
     df_team_better['INJURED_PLAYERS_AWAY_STATS'] = df_team_better.apply(get_player_stats_better, axis=1, player_col='INJURED_PLAYERS_AWAY')
 
-    df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_explode_better.csv'), index=True)
+    df_team_better.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_explode_better.csv'), index=True)
 
 
 def preprocess_advanced_stats():

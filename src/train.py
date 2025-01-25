@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import logging as log
 
-from constants import PLOTS_DIR
+from constants import PLOTS_DIR, TEAMLOG_DATA
 from utils import check_create_dir
 
 EVAL_DIR = os.path.join(PLOTS_DIR, 'evaluation')
@@ -125,7 +125,7 @@ def perform_grid_search(clf, param_grid, X_train, y_train):
 def train_model(clf, data: pd.DataFrame, param_grid=None):
 
     # Split the data into features and target
-    X = data.drop(columns=['WL', 'SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_HOME', 'TEAM_ID_AWAY'], inplace=False)
+    X = data.drop(columns=['WL', 'SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_HOME', 'TEAM_ID_AWAY', 'INJURED_PLAYERS_HOME', 'INJURED_PLAYERS_AWAY'], inplace=False)
     y = data['WL']
 
     # Split the data into training and testing sets
@@ -153,7 +153,7 @@ def train_model(clf, data: pd.DataFrame, param_grid=None):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('data/nba_data_combined.csv')
+    data = pd.read_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_explode_better.csv'))
     log.info(f"Shape of data: {data.shape}")
 
     # clf = LogisticRegression(random_state=SEED)
