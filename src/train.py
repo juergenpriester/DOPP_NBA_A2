@@ -127,9 +127,9 @@ def train_model(clf, data: pd.DataFrame, param_grid=None):
 
     # balance data
     data = data.sample(frac=1)
-    data_win = data[data['WL'] == 'W']
-    data_loss = data[data['WL'] == 'L']
-    data_loss = data_loss.sample(n=data_win.shape[0])
+    data_win = data[data['WL'] == 1]
+    data_loss = data[data['WL'] == 0]
+    data_win = data_win.sample(n=data_loss.shape[0])
     data = pd.concat([data_win, data_loss])
 
     # Split the data into features and target
