@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,9 +7,9 @@ from functools import reduce
 
 
 from utils import check_create_dir
-from constants import DATA_DIR, PLOTS_DIR
+from constants import PLOTS_DIR, TEAMLOG_DATA
 
-EXPLORE_DIR = PLOTS_DIR + '/exploration'
+EXPLORE_DIR = os.path.join(PLOTS_DIR, '/exploration')
 check_create_dir(EXPLORE_DIR)
 
 
@@ -91,7 +92,7 @@ def plot_scatter(df: pd.DataFrame):
 
 def main():
     check_create_dir(PLOTS_DIR)
-    df = pd.read_csv('data/nba_data_combined.csv')
+    df = pd.read_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined.csv'))
     log.info("Percentage of home wins")
     log.info(np.round(df['WL'].mean(), 4))
 

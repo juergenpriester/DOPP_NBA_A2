@@ -9,7 +9,9 @@ from utils import check_create_dir
 from constants import DATA_DIR, SEASONS, TEAMLOG_DATA, PLAYERLOG_DATA, INJURY_DATA
 
 
-log.basicConfig(level=log.INFO)
+log.basicConfig(level=log.INFO,
+                format='%(asctime)s: %(levelname)s: %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def load_injury_data() -> pd.DataFrame:
