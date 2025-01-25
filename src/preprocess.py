@@ -119,6 +119,10 @@ def preprocess_teamlogs():
     df_full_converted = convert_dtypes_teamlogs(df)
     df_full_converted.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_full_converted.csv'), index=False)
 
+    # create mapping from team name to team id and save to json file
+    team_mapping = df_full_converted[['TEAM_NAME', 'TEAM_ID']].drop_duplicates()
+    team_mapping.to_json(os.path.join(DATA_DIR, 'team_id_mapping.json'), orient='records')
+
     COLUMNS = DEFAULT_COLUMNS + NUMERIC_COLUMNS
     df = df[COLUMNS]
 

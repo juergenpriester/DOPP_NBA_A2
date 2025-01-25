@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from utils import load_from_csv
-from constants import INJURY_DATA, PLAYERLOG_DATA
+from constants import DATA_DIR, INJURY_DATA, PLAYERLOG_DATA
 
 
 def preprocess_injury_data():
@@ -156,6 +156,17 @@ def preprocess_injury_data():
     result_df["Team"] = result_df["Team"].astype(str)
     result_df["Player"] = result_df["Player"].astype(str).str.strip()
     result_df["Injury_Notes"] = result_df["Injury_Notes"].astype(str).str.strip()
+
+    team_name_mapping = pd.read_json(os.path.join(DATA_DIR, 'team_name_mapping.json'))
+    team_id_mapping = pd.read_json(os.path.join(DATA_DIR, 'team_id_mapping.json'))
+    player_mapping = pd.read_json(os.path.join(DATA_DIR, 'player_mapping.json'))
+
+    # Mapping Team Name to Team ID
+    result_df = result_df.merge(team_name_mapping, left_on='Team', right_on='Team', how='left')
+    result_df = result_df.drop(columns=['Team'], inplace=False)
+    result_df.rename(columns={'TEAM_NAME': 'TEAM'}, inplace=True)
+    result_df = result_df.merge(team_id_mapping, left_on='TEAM', right_on='TEAM_NAME', how='left')
+    result_df = result_df.drop(columns=['TEAM', 'TEAM_NAME'], inplace=False)
 
     result_df = result_df.sort_values(["Player", "Injury_Start"])
     result_df = result_df.reset_index(drop=True)
