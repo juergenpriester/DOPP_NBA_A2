@@ -3,11 +3,12 @@ import pandas as pd
 import logging as log
 import os
 import kagglehub
+import unidecode
 
+from injury_preprocess import preprocess_injury_data
 from utils import check_create_dir, load_from_csv
 
 from constants import DATA_DIR, TEAMLOG_DATA, PLAYERLOG_DATA, INJURY_DATA, DEFAULT_COLUMNS, NUMERIC_COLUMNS, AGG_WINDOW_SIZES, WIN_PCT_COLUMN
-from injury_preprocess import preprocess_injury_data, preprocess_advanced_stats
 log.basicConfig(level=log.INFO)
 
 
@@ -231,10 +232,36 @@ def merge_games_injuries():
     df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_explode.csv'), index=True)
 
 
+def preprocess_advanced_stats():
+    df_advanced = load_from_csv(os.path.join(PLAYERLOG_DATA, "player_advanced.csv"))
+    df_advanced.drop(columns=["Rk", "AS", "Pos"], inplace=True)
+    df_advanced["Season"] = df_advanced["Season"].apply(lambda x: int(x[:4]))
+    df_advanced["Team"] = df_advanced["Team"].astype(str)
+    df_advanced["Player"] = df_advanced["Player"].astype(str)
+
+    df_advanced["Player"] = df_advanced["Player"].apply(lambda x: unidecode.unidecode(x))
+    df_advanced.columns = df_advanced.columns.str.upper()
+
+    df_advanced.to_csv(os.path.join(PLAYERLOG_DATA, "player_advanced_cleaned.csv"), index=False)
+
+
+def preprocess_stats():
+    df = load_from_csv(os.path.join(PLAYERLOG_DATA, "player_data.csv"))
+    df["Season"] = df["SEASON_YEAR"].apply(lambda x: int(x[:4]))
+    df["Team"] = df["TEAM_ABBREVIATION"].astype(str)
+    df["Player"] = df["PLAYER_NAME"].astype(str)
+    df["Player"] = df["Player"].apply(lambda x: unidecode.unidecode(x))
+
+    df.drop(columns=["SEASON_YEAR", "PLAYER_NAME"], inplace=True)
+    df.columns = df.columns.str.upper()
+    df.to_csv(os.path.join(PLAYERLOG_DATA, "player_data_cleaned.csv"), index=False)
+
+
 def main():
     check_create_dir(DATA_DIR)
     preprocess_injury_data()
     preprocess_teamlogs()
+    preprocess_stats()
     preprocess_advanced_stats()
 
     merge_games_injuries()

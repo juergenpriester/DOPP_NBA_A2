@@ -190,35 +190,3 @@ def preprocess_injury_data():
     # players = list(set([entry["PLAYER"] for entry in result]))
 
     result_df.to_csv(os.path.join(INJURY_DATA, "injury_data_cleaned.csv"), index=False)
-
-
-def preprocess_advanced_stats():
-    df_advanced = load_from_csv(os.path.join(PLAYERLOG_DATA, "player_advanced.csv"))
-    df_advanced.drop(columns=["Rk", "AS", "Pos"], inplace=True)
-    df_advanced["Season"] = df_advanced["Season"].apply(
-        lambda x: int(x.split("-")[1]) + 2000 - 1
-    )
-    df_advanced["Team"] = df_advanced["Team"].astype(str)
-    df_advanced["Player"] = df_advanced["Player"].astype(str)
-
-    df_advanced["Player"] = df_advanced["Player"].apply(lambda x: unidecode.unidecode(x))
-    df_advanced.columns = df_advanced.columns.str.upper()
-
-    df_advanced.to_csv(os.path.join(PLAYERLOG_DATA, "player_advanced_cleaned.csv"), index=False)
-
-
-if __name__ == "__main__":
-    players, result = preprocess_injury_data()
-
-    # significant injuries missing: Chet Holmgren, Luka Doncic, Franz Wagner
-    player_name = "Nikola Jokic"  # Replace with the name you want to search for
-    player_injury = result[result["Player"] == player_name]
-
-    result.to_csv(os.path.join(INJURY_DATA, "injury_data_cleaned.csv"), index=False)
-
-    df = preprocess_advanced_stats()
-    player_name = "Nikola Jokić"  # Replace with the name you want to search for
-    player_data = df[df["Player"] == player_name]
-    player_df = player_data[["Player", "Season", "WS/48", "BPM"]]
-
-    df.to_csv(os.path.join(PLAYERLOG_DATA, "player_advanced_cleaned.csv"), index=False)
