@@ -178,11 +178,15 @@ def preprocess_advanced_stats():
 if __name__ == "__main__":
     players, result = preprocess_injury_data()
 
-    ##significant injuries missing: Chet Holmgren, Luka Doncic, Franz Wagner
+    # significant injuries missing: Chet Holmgren, Luka Doncic, Franz Wagner
     player_name = "Nikola Jokic"  # Replace with the name you want to search for
     player_injury = result[result["Player"] == player_name]
+
+    result.to_csv(os.path.join(INJURY_DATA, "injury_data_cleaned.csv"), index=False)
 
     df = preprocess_advanced_stats()
     player_name = "Nikola Jokić"  # Replace with the name you want to search for
     player_data = df[df["Player"] == player_name]
     player_df = player_data[["Player", "Season", "WS/48", "BPM"]]
+
+    df.to_csv(os.path.join(PLAYERLOG_DATA, "player_advanced_cleaned.csv"), index=False)
