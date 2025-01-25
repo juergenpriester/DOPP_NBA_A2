@@ -9,7 +9,9 @@ from injury_preprocess import preprocess_injury_data
 from utils import check_create_dir, load_from_csv
 
 from constants import DATA_DIR, TEAMLOG_DATA, PLAYERLOG_DATA, INJURY_DATA, DEFAULT_COLUMNS, NUMERIC_COLUMNS, AGG_WINDOW_SIZES, WIN_PCT_COLUMN
-log.basicConfig(level=log.INFO)
+log.basicConfig(level=log.INFO,
+                format='%(asctime)s: %(levelname)s: %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def convert_dtypes_teamlogs(df: pd.DataFrame, numeric_cols=None) -> pd.DataFrame:
@@ -192,12 +194,14 @@ def merge_games_injuries():
     df_team = load_from_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined.csv'))
     df_injury = load_from_csv(os.path.join(INJURY_DATA, 'injury_data_cleaned.csv'))
     df_players = load_from_csv(os.path.join(PLAYERLOG_DATA, 'player_advanced_cleaned.csv'))
+    df_players_better = load_from_csv(os.path.join(PLAYERLOG_DATA, 'player_data_cleaned.csv'))
 
     # injury start in datetime format
     df_team['GAME_DATE'] = pd.to_datetime(df_team['GAME_DATE'])
     df_team['SEASON_YEAR'] = pd.to_datetime(df_team['SEASON_YEAR'], format='%Y')
     df_injury['INJURY_START'] = pd.to_datetime(df_injury['INJURY_START'])
     df_injury['INJURY_END'] = pd.to_datetime(df_injury['INJURY_END'])
+    df_players_better['GAME_DATE'] = pd.to_datetime(df_players_better['GAME_DATE'])
 
     def list_injured_players(row, team_col):
         injured_players = df_injury[
@@ -210,40 +214,26 @@ def merge_games_injuries():
     df_team['INJURED_PLAYERS_HOME'] = df_team.apply(list_injured_players, axis=1, team_col='TEAM_ID_HOME')
     df_team['INJURED_PLAYERS_AWAY'] = df_team.apply(list_injured_players, axis=1, team_col='TEAM_ID_AWAY')
 
-    """ def get_player_stats(row, player_col):
+    df_team_better = df_team.copy()
+
+    def get_player_stats_better(row, player_col):
         stats = []
         for player_name in row[player_col]:
-            player_stats = df_players[
-                (df_players['PLAYER'] == player_name) &
-                (df_players['SEASON'] < row['SEASON_YEAR'].year)
-            ].sort_values(by='SEASON', ascending=False).head(1)
-            if not player_stats.empty:
-                stats.append(player_stats.iloc[0]['WS/48'])
-
-        return np.sum(stats) """
-
-    df_players = load_from_csv(os.path.join(PLAYERLOG_DATA, 'player_data_cleaned.csv'))
-    df_players['GAME_DATE'] = pd.to_datetime(df_players['GAME_DATE'])
-
-    def get_player_stats(row, player_col):
-        stats = []
-        for player_name in row[player_col]:
-            player_stats = df_players[
-                (df_players['PLAYER'] == player_name) &
-                (df_players['GAME_DATE'] < row['GAME_DATE'])
-            ].sort_values(by='GAME_DATE', ascending=False).head(20)
+            player_stats = df_players_better[
+                (df_players_better['PLAYER'] == player_name) &
+                (df_players_better['GAME_DATE'] < row['GAME_DATE'])
+            ].sort_values(by='GAME_DATE', ascending=False).head(15)
             if not player_stats.empty:
                 stats.append(player_stats['MIN'].mean()*player_stats['PTS'].mean())
 
         return np.sum(stats)
 
-    # df_team = df_team.explode('INJURED_PLAYERS_HOME')
-    df_team['INJURED_PLAYERS_HOME_STATS'] = df_team.apply(get_player_stats, axis=1, player_col='INJURED_PLAYERS_HOME')
+     # df_team = df_team.explode('INJURED_PLAYERS_HOME')
+    df_team_better['INJURED_PLAYERS_HOME_STATS'] = df_team_better.apply(get_player_stats_better, axis=1, player_col='INJURED_PLAYERS_HOME')
     # df_team = df_team.explode('INJURED_PLAYERS_AWAY')
-    df_team['INJURED_PLAYERS_AWAY_STATS'] = df_team.apply(get_player_stats, axis=1, player_col='INJURED_PLAYERS_AWAY')
+    df_team_better['INJURED_PLAYERS_AWAY_STATS'] = df_team_better.apply(get_player_stats_better, axis=1, player_col='INJURED_PLAYERS_AWAY')
 
-    df_team = df_team.drop(columns=['INJURED_PLAYERS_HOME', 'INJURED_PLAYERS_AWAY'], inplace=False)
-    df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries.csv'), index=True)
+    df_team_better.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_explode_better.csv'), index=True)
 
 
 def preprocess_advanced_stats():
@@ -265,6 +255,7 @@ def preprocess_stats():
     df["Team"] = df["TEAM_ABBREVIATION"].astype(str)
     df["Player"] = df["PLAYER_NAME"].astype(str)
     df["Player"] = df["Player"].apply(lambda x: unidecode.unidecode(x))
+    df['GAME_DATE'] = pd.to_datetime(df['GAME_DATE'])
 
     df.drop(columns=["SEASON_YEAR", "PLAYER_NAME"], inplace=True)
     df.columns = df.columns.str.upper()
