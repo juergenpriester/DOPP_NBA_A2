@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from utils import load_from_csv
 from constants import DATA_DIR, INJURY_DATA, PLAYERLOG_DATA
+import unidecode
 
 
 def preprocess_injury_data():
@@ -168,6 +169,9 @@ def preprocess_injury_data():
     result_df = result_df.merge(team_id_mapping, left_on='TEAM', right_on='TEAM_NAME', how='left')
     result_df = result_df.drop(columns=['TEAM', 'TEAM_NAME'], inplace=False)
 
+    # from "Player" column remove string that are contained in brackets ()
+    result_df["Player"] = result_df["Player"].str.replace(r"\(.*\) ", "", regex=True)
+
     result_df = result_df.sort_values(["Player", "Injury_Start"])
     result_df = result_df.reset_index(drop=True)
 
@@ -184,6 +188,9 @@ def preprocess_advanced_stats():
     )
     df_advanced["Team"] = df_advanced["Team"].astype(str)
     df_advanced["Player"] = df_advanced["Player"].astype(str)
+
+    df_advanced["Player"] = df_advanced["Player"].apply(lambda x: unidecode.unidecode(x))
+
     df_advanced.to_csv(os.path.join(PLAYERLOG_DATA, "player_advanced_cleaned.csv"), index=False)
 
 
