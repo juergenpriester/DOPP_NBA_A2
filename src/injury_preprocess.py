@@ -158,9 +158,10 @@ def preprocess_injury_data():
     result_df["Player"] = result_df["Player"].astype(str).str.strip()
     result_df["Injury_Notes"] = result_df["Injury_Notes"].astype(str).str.strip()
 
-    team_name_mapping = pd.read_json(os.path.join(DATA_DIR, 'team_name_mapping.json'))
-    team_id_mapping = pd.read_json(os.path.join(DATA_DIR, 'team_id_mapping.json'))
-    player_mapping = pd.read_json(os.path.join(DATA_DIR, 'player_mapping.json'))
+    # Load mappings
+    team_name_mapping = pd.read_json(os.path.join('mappings', 'team_name_mapping.json'))
+    team_id_mapping = pd.read_json(os.path.join('mappings', 'team_id_mapping.json'))
+    player_mapping = pd.read_json(os.path.join('mappings', 'player_mapping.json'))
 
     # Mapping Team Name to Team ID
     result_df = result_df.merge(team_name_mapping, left_on='Team', right_on='Team', how='left')
@@ -170,12 +171,23 @@ def preprocess_injury_data():
     result_df = result_df.drop(columns=['TEAM', 'TEAM_NAME'], inplace=False)
 
     # from "Player" column remove string that are contained in brackets ()
-    result_df["Player"] = result_df["Player"].str.replace(r"\(.*\) ", "", regex=True)
+    result_df["Player"] = result_df["Player"].str.replace(r"\(.*\)", "", regex=True)
+    # Split a row where the name contatins "/" into two rows
+    result_df = result_df.assign(
+        Player=result_df["Player"].str.split("/")).explode("Player")
+    result_df["Player"] = result_df["Player"].str.strip()
 
-    result_df = result_df.sort_values(["Player", "Injury_Start"])
+    # turn into datetime
+    result_df["Injury_Start"] = pd.to_datetime(result_df["Injury_Start"])
+    result_df["Injury_End"] = pd.to_datetime(result_df["Injury_End"])
+
+    # rename columns into Caps
+    result_df.columns = result_df.columns.str.upper()
+
+    result_df = result_df.sort_values(["PLAYER", "INJURY_START"])
     result_df = result_df.reset_index(drop=True)
 
-    players = list(set([entry["Player"] for entry in result]))
+    # players = list(set([entry["PLAYER"] for entry in result]))
 
     result_df.to_csv(os.path.join(INJURY_DATA, "injury_data_cleaned.csv"), index=False)
 
@@ -190,6 +202,7 @@ def preprocess_advanced_stats():
     df_advanced["Player"] = df_advanced["Player"].astype(str)
 
     df_advanced["Player"] = df_advanced["Player"].apply(lambda x: unidecode.unidecode(x))
+    df_advanced.columns = df_advanced.columns.str.upper()
 
     df_advanced.to_csv(os.path.join(PLAYERLOG_DATA, "player_advanced_cleaned.csv"), index=False)
 

@@ -11,10 +11,6 @@ from injury_preprocess import preprocess_injury_data, preprocess_advanced_stats
 log.basicConfig(level=log.INFO)
 
 
-def create_team_mapping(df: pd.DataFrame):
-    pass
-
-
 def convert_dtypes_teamlogs(df: pd.DataFrame, numeric_cols=None) -> pd.DataFrame:
     df = df.copy()
     df['SEASON_YEAR'] = df['SEASON_YEAR'].str[:4].astype(int)
@@ -80,14 +76,6 @@ def aggregate_team_stats(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def aggregate_player_stats(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df = df.sort_values(by=['GAME_DATE', 'PLAYER_NAME'])
-    df = compute_rolling_values(df, 9999, agg_function=lambda x: np.mean(x), group=['PLAYER_ID', 'SEASON_YEAR'])
-
-    return df
-
-
 def combine_on_gameid(df) -> pd.DataFrame:
     if 'TEAM_NAME' in df.columns:
         df = df.drop(columns=['TEAM_NAME'], inplace=False)
@@ -121,7 +109,7 @@ def preprocess_teamlogs():
 
     # create mapping from team name to team id and save to json file
     team_mapping = df_full_converted[['TEAM_NAME', 'TEAM_ID']].drop_duplicates()
-    team_mapping.to_json(os.path.join(DATA_DIR, 'team_id_mapping.json'), orient='records')
+    team_mapping.to_json(os.path.join('mappings', 'team_id_mapping.json'), orient='records')
 
     COLUMNS = DEFAULT_COLUMNS + NUMERIC_COLUMNS
     df = df[COLUMNS]
@@ -141,7 +129,15 @@ def preprocess_teamlogs():
     df.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined.csv'), index=True)
 
 
-def preprocess_player_logs():
+""" def preprocess_player_logs():
+
+    def aggregate_player_stats(df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
+        df = df.sort_values(by=['GAME_DATE', 'PLAYER_NAME'])
+        df = compute_rolling_values(df, 9999, agg_function=lambda x: np.mean(x), group=['PLAYER_ID', 'SEASON_YEAR'])
+
+        return df
+
     log.info("Loading data from csv")
     df = load_from_csv(os.path.join(PLAYERLOG_DATA, "player_data.csv"))
     log.info(df.head())
@@ -161,7 +157,7 @@ def create_player_mapping(df: pd.DataFrame):
     # create json file containing player name to player id mapping
     player_mapping = df[['PLAYER_NAME', 'PLAYER_ID']].drop_duplicates()
     player_mapping.to_json(os.path.join(DATA_DIR, 'player_mapping.json'), orient='records')
-
+ """
 
 """ def preprocess_injury_data():
     df = pd.read_csv(os.path.join(INJURY_DATA, "injury_data.csv"), index_col="Unnamed: 0")
@@ -190,12 +186,41 @@ def create_player_mapping(df: pd.DataFrame):
     df.to_csv(os.path.join(INJURY_DATA, 'injury_data_converted.csv'), index=False) """
 
 
+def merge_games_injuries():
+    df_team = load_from_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined.csv'))
+    df_injury = load_from_csv(os.path.join(INJURY_DATA, 'injury_data_cleaned.csv'))
+    df_players = load_from_csv(os.path.join(PLAYERLOG_DATA, 'player_advanced_cleaned.csv'))
+
+    # injury start in datetime format
+    df_injury['INJURY_START'] = pd.to_datetime(df_injury['INJURY_START'])
+    df_injury['INJURY_END'] = pd.to_datetime(df_injury['INJURY_END'])
+
+    def list_injured_players(row, team_col):
+        injured_players = df_injury[
+            (df_injury['TEAM_ID'] == row[team_col]) &
+            (df_injury['INJURY_START'] <= row['GAME_DATE']) &
+            (df_injury['INJURY_END'] >= row['GAME_DATE'])
+        ]['PLAYER'].tolist()
+        return injured_players
+
+    df_team['INJURED_PLAYERS_HOME'] = df_team.apply(list_injured_players, axis=1, team_col='TEAM_ID_HOME')
+    df_team['INJURED_PLAYERS_AWAY'] = df_team.apply(list_injured_players, axis=1, team_col='TEAM_ID_AWAY')
+
+    df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_list.csv'), index=True)
+
+    df_team = df_team.explode('INJURED_PLAYERS_HOME')
+    df_team = df_team.explode('INJURED_PLAYERS_AWAY')
+
+    df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_explode.csv'), index=True)
+
+
 def main():
     check_create_dir(DATA_DIR)
-    preprocess_teamlogs()
-    preprocess_player_logs()
     preprocess_injury_data()
+    preprocess_teamlogs()
     preprocess_advanced_stats()
+
+    merge_games_injuries()
 
 
 if __name__ == '__main__':

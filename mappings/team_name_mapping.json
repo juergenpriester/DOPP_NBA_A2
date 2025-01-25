@@ -1,0 +1,126 @@
+[
+  {
+    "Team": "Blazers",
+    "TEAM_NAME": "Portland Trail Blazers"
+  },
+  {
+    "Team": "Cavaliers",
+    "TEAM_NAME": "Cleveland Cavaliers"
+  },
+  {
+    "Team": "Jazz",
+    "TEAM_NAME": "Utah Jazz"
+  },
+  {
+    "Team": "Knicks",
+    "TEAM_NAME": "New York Knicks"
+  },
+  {
+    "Team": "Spurs",
+    "TEAM_NAME": "San Antonio Spurs"
+  },
+  {
+    "Team": "Warriors",
+    "TEAM_NAME": "Golden State Warriors"
+  },
+  {
+    "Team": "76ers",
+    "TEAM_NAME": "Philadelphia 76ers"
+  },
+  {
+    "Team": "Bucks",
+    "TEAM_NAME": "Milwaukee Bucks"
+  },
+  {
+    "Team": "Celtics",
+    "TEAM_NAME": "Boston Celtics"
+  },
+  {
+    "Team": "Grizzlies",
+    "TEAM_NAME": "Memphis Grizzlies"
+  },
+  {
+    "Team": "Heat",
+    "TEAM_NAME": "Miami Heat"
+  },
+  {
+    "Team": "Hornets",
+    "TEAM_NAME": "Charlotte Hornets"
+  },
+  {
+    "Team": "Kings",
+    "TEAM_NAME": "Sacramento Kings"
+  },
+  {
+    "Team": "Lakers",
+    "TEAM_NAME": "Los Angeles Lakers"
+  },
+  {
+    "Team": "Magic",
+    "TEAM_NAME": "Orlando Magic"
+  },
+  {
+    "Team": "Mavericks",
+    "TEAM_NAME": "Dallas Mavericks"
+  },
+  {
+    "Team": "Nets",
+    "TEAM_NAME": "Brooklyn Nets"
+  },
+  {
+    "Team": "Nuggets",
+    "TEAM_NAME": "Denver Nuggets"
+  },
+  {
+    "Team": "Pacers",
+    "TEAM_NAME": "Indiana Pacers"
+  },
+  {
+    "Team": "Pelicans",
+    "TEAM_NAME": "New Orleans Pelicans"
+  },
+  {
+    "Team": "Pistons",
+    "TEAM_NAME": "Detroit Pistons"
+  },
+  {
+    "Team": "Raptors",
+    "TEAM_NAME": "Toronto Raptors"
+  },
+  {
+    "Team": "Rockets",
+    "TEAM_NAME": "Houston Rockets"
+  },
+  {
+    "Team": "Suns",
+    "TEAM_NAME": "Phoenix Suns"
+  },
+  {
+    "Team": "Thunder",
+    "TEAM_NAME": "Oklahoma City Thunder"
+  },
+  {
+    "Team": "Timberwolves",
+    "TEAM_NAME": "Minnesota Timberwolves"
+  },
+  {
+    "Team": "Bulls",
+    "TEAM_NAME": "Chicago Bulls"
+  },
+  {
+    "Team": "Clippers",
+    "TEAM_NAME": "LA Clippers"
+  },
+  {
+    "Team": "Hawks",
+    "TEAM_NAME": "Atlanta Hawks"
+  },
+  {
+    "Team": "Wizards",
+    "TEAM_NAME": "Washington Wizards"
+  },
+  {
+    "Team": "Bullets",
+    "TEAM_NAME": "Washington Wizards"
+  }
+]
