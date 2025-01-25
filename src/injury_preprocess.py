@@ -196,7 +196,7 @@ def preprocess_advanced_stats():
     df_advanced = load_from_csv(os.path.join(PLAYERLOG_DATA, "player_advanced.csv"))
     df_advanced.drop(columns=["Rk", "AS", "Pos"], inplace=True)
     df_advanced["Season"] = df_advanced["Season"].apply(
-        lambda x: int(x.split("-")[1]) + 2000
+        lambda x: int(x.split("-")[1]) + 2000 - 1
     )
     df_advanced["Team"] = df_advanced["Team"].astype(str)
     df_advanced["Player"] = df_advanced["Player"].astype(str)

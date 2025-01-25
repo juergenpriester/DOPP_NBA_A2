@@ -187,11 +187,14 @@ def create_player_mapping(df: pd.DataFrame):
 
 
 def merge_games_injuries():
+    log.info("Meging team data with injury data")
     df_team = load_from_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined.csv'))
     df_injury = load_from_csv(os.path.join(INJURY_DATA, 'injury_data_cleaned.csv'))
     df_players = load_from_csv(os.path.join(PLAYERLOG_DATA, 'player_advanced_cleaned.csv'))
 
     # injury start in datetime format
+    df_team['GAME_DATE'] = pd.to_datetime(df_team['GAME_DATE'])
+    df_team['SEASON_YEAR'] = pd.to_datetime(df_team['SEASON_YEAR'], format='%Y')
     df_injury['INJURY_START'] = pd.to_datetime(df_injury['INJURY_START'])
     df_injury['INJURY_END'] = pd.to_datetime(df_injury['INJURY_END'])
 
@@ -208,8 +211,22 @@ def merge_games_injuries():
 
     df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_list.csv'), index=True)
 
-    df_team = df_team.explode('INJURED_PLAYERS_HOME')
-    df_team = df_team.explode('INJURED_PLAYERS_AWAY')
+    def get_player_stats(row, player_col):
+        stats = []
+        for player_name in row[player_col]:
+            player_stats = df_players[
+                (df_players['PLAYER'] == player_name) &
+                (df_players['SEASON'] < row['SEASON_YEAR'].year)
+            ].sort_values(by='SEASON', ascending=False).head(1)
+            if not player_stats.empty:
+                stats.append(player_stats.iloc[0]['WS/48'])
+
+        return np.sum(stats)
+
+    # df_team = df_team.explode('INJURED_PLAYERS_HOME')
+    df_team['INJURED_PLAYERS_HOME_STATS'] = df_team.apply(get_player_stats, axis=1, player_col='INJURED_PLAYERS_HOME')
+    # df_team = df_team.explode('INJURED_PLAYERS_AWAY')
+    df_team['INJURED_PLAYERS_AWAY_STATS'] = df_team.apply(get_player_stats, axis=1, player_col='INJURED_PLAYERS_AWAY')
 
     df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_explode.csv'), index=True)
 
