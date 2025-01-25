@@ -1,3 +1,4 @@
+import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -9,15 +10,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import logging as log
 
-from constants import DATA_DIR, PLOTS_DIR
+from constants import PLOTS_DIR
 from utils import check_create_dir
 
-EVAL_DIR = PLOTS_DIR + '/evaluation'
+EVAL_DIR = os.path.join(PLOTS_DIR, 'evaluation')
 SEED = 42
 np.random.seed(SEED)
 
 
-log.basicConfig(level=log.INFO)
+log.basicConfig(level=log.INFO,
+                format='%(asctime)s: %(levelname)s: %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def calc_metrics(y_test, y_pred):
@@ -163,7 +166,7 @@ if __name__ == '__main__':
         'min_samples_split': [5],
         'min_samples_leaf': [1]
     }
-    EVAL_DIR = EVAL_DIR + "/" + type(clf).__name__
+    EVAL_DIR = os.path.join(EVAL_DIR, type(clf).__name__)
     check_create_dir(EVAL_DIR)
 
     train_model(clf, data)

@@ -1,8 +1,6 @@
 import pandas as pd
 import os
-from utils import load_from_csv
-from constants import DATA_DIR, INJURY_DATA, PLAYERLOG_DATA
-import unidecode
+from constants import INJURY_DATA
 
 
 def preprocess_injury_data():

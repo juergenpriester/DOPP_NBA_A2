@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,9 +7,9 @@ from functools import reduce
 
 
 from utils import check_create_dir
-from constants import DATA_DIR, PLOTS_DIR
+from constants import PLOTS_DIR
 
-EXPLORE_DIR = PLOTS_DIR + '/exploration'
+EXPLORE_DIR = os.path.join(PLOTS_DIR, '/exploration')
 check_create_dir(EXPLORE_DIR)
 
 
