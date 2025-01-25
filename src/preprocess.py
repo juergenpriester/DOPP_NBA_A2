@@ -210,9 +210,7 @@ def merge_games_injuries():
     df_team['INJURED_PLAYERS_HOME'] = df_team.apply(list_injured_players, axis=1, team_col='TEAM_ID_HOME')
     df_team['INJURED_PLAYERS_AWAY'] = df_team.apply(list_injured_players, axis=1, team_col='TEAM_ID_AWAY')
 
-    df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_list.csv'), index=True)
-
-    def get_player_stats(row, player_col):
+    """ def get_player_stats(row, player_col):
         stats = []
         for player_name in row[player_col]:
             player_stats = df_players[
@@ -222,6 +220,21 @@ def merge_games_injuries():
             if not player_stats.empty:
                 stats.append(player_stats.iloc[0]['WS/48'])
 
+        return np.sum(stats) """
+
+    df_players = load_from_csv(os.path.join(PLAYERLOG_DATA, 'player_data_cleaned.csv'))
+    df_players['GAME_DATE'] = pd.to_datetime(df_players['GAME_DATE'])
+
+    def get_player_stats(row, player_col):
+        stats = []
+        for player_name in row[player_col]:
+            player_stats = df_players[
+                (df_players['PLAYER'] == player_name) &
+                (df_players['GAME_DATE'] < row['GAME_DATE'])
+            ].sort_values(by='GAME_DATE', ascending=False).head(20)
+            if not player_stats.empty:
+                stats.append(player_stats['MIN'].mean()*player_stats['PTS'].mean())
+
         return np.sum(stats)
 
     # df_team = df_team.explode('INJURED_PLAYERS_HOME')
@@ -229,7 +242,8 @@ def merge_games_injuries():
     # df_team = df_team.explode('INJURED_PLAYERS_AWAY')
     df_team['INJURED_PLAYERS_AWAY_STATS'] = df_team.apply(get_player_stats, axis=1, player_col='INJURED_PLAYERS_AWAY')
 
-    df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries_explode.csv'), index=True)
+    df_team = df_team.drop(columns=['INJURED_PLAYERS_HOME', 'INJURED_PLAYERS_AWAY'], inplace=False)
+    df_team.to_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries.csv'), index=True)
 
 
 def preprocess_advanced_stats():

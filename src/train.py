@@ -8,8 +8,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import logging as log
+import os
 
-from constants import DATA_DIR, PLOTS_DIR
+from constants import DATA_DIR, PLOTS_DIR, TEAMLOG_DATA
 from utils import check_create_dir
 
 EVAL_DIR = PLOTS_DIR + '/evaluation'
@@ -121,9 +122,22 @@ def perform_grid_search(clf, param_grid, X_train, y_train):
 
 def train_model(clf, data: pd.DataFrame, param_grid=None):
 
+    # balance data
+    data = data.sample(frac=1)
+    data_win = data[data['WL'] == 'W']
+    data_loss = data[data['WL'] == 'L']
+    data_loss = data_loss.sample(n=data_win.shape[0])
+    data = pd.concat([data_win, data_loss])
+
     # Split the data into features and target
     X = data.drop(columns=['WL', 'SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_HOME', 'TEAM_ID_AWAY'], inplace=False)
+    X = X.drop(columns=['INJURED_PLAYERS_HOME_STATS', 'INJURED_PLAYERS_AWAY_STATS'], inplace=False)
+    if "Unnamed: 0" in X.columns:
+        X = X.drop(columns=['Unnamed: 0'], inplace=False)
     y = data['WL']
+
+    log.info("Train Data")
+    log.info(X.head())
 
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED)
@@ -150,7 +164,7 @@ def train_model(clf, data: pd.DataFrame, param_grid=None):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('data/nba_data_combined.csv')
+    data = pd.read_csv(os.path.join(TEAMLOG_DATA, 'team_data_combined_injuries.csv'))
     log.info(f"Shape of data: {data.shape}")
 
     # clf = LogisticRegression(random_state=SEED)
