@@ -2,7 +2,7 @@ import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_recall_curve, precision_score, recall_score, roc_curve
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_recall_curve, precision_score, recall_score, roc_curve, balanced_accuracy_score
 import xgboost as xgb
 from sklearn.ensemble import GradientBoostingClassifier
 import pandas as pd
@@ -27,13 +27,11 @@ log.basicConfig(level=log.INFO,
 def calc_metrics(y_test, y_pred):
     accuracy = accuracy_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred, average='binary')
-    precision = precision_score(y_test, y_pred, average='binary')
-    recall = recall_score(y_test, y_pred, average='binary')
+    balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
     metrics = {
         'accuracy': accuracy,
         'f1': f1,
-        'precision': precision,
-        'recall': recall
+        'balanced_accuracy': balanced_accuracy
     }
     log.info(f"Metrics: {metrics}")
     return metrics
@@ -125,16 +123,9 @@ def perform_grid_search(clf, param_grid, X_train, y_train):
 
 def train_model(clf, data: pd.DataFrame, param_grid=None):
 
-    # balance data
-    data = data.sample(frac=1)
-    data_win = data[data['WL'] == 1]
-    data_loss = data[data['WL'] == 0]
-    data_win = data_win.sample(n=data_loss.shape[0])
-    data = pd.concat([data_win, data_loss])
-
     # Split the data into features and target
     X = data.drop(columns=['WL', 'SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_HOME', 'TEAM_ID_AWAY'], inplace=False)
-    X = X.drop(columns=['INJURED_PLAYERS_HOME_STATS', 'INJURED_PLAYERS_AWAY_STATS'], inplace=False)
+    # X = X.drop(columns=['INJURED_PLAYERS_HOME_STATS', 'INJURED_PLAYERS_AWAY_STATS'], inplace=False)
     if "Unnamed: 0" in X.columns:
         X = X.drop(columns=['Unnamed: 0'], inplace=False)
     y = data['WL']
