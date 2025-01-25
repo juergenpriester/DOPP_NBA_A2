@@ -7,7 +7,7 @@ import kagglehub
 from utils import check_create_dir, load_from_csv
 
 from constants import DATA_DIR, TEAMLOG_DATA, PLAYERLOG_DATA, INJURY_DATA, DEFAULT_COLUMNS, NUMERIC_COLUMNS, AGG_WINDOW_SIZES, WIN_PCT_COLUMN
-
+from injury_preprocess import preprocess_injury_data, preprocess_advanced_stats
 log.basicConfig(level=log.INFO)
 
 
@@ -159,7 +159,7 @@ def create_player_mapping(df: pd.DataFrame):
     player_mapping.to_json(os.path.join(DATA_DIR, 'player_mapping.json'), orient='records')
 
 
-def preprocess_injury_data():
+""" def preprocess_injury_data():
     df = pd.read_csv(os.path.join(INJURY_DATA, "injury_data.csv"), index_col="Unnamed: 0")
     df['Date'] = pd.to_datetime(df['Date'])
     # keep dates greater than 2016-10-01
@@ -183,7 +183,7 @@ def preprocess_injury_data():
     log.info(df.head())
     log.info(f"Number of not nan values in Acquired_ID column {df['Acquired_ID'].notna().sum()}")
 
-    df.to_csv(os.path.join(INJURY_DATA, 'injury_data_converted.csv'), index=False)
+    df.to_csv(os.path.join(INJURY_DATA, 'injury_data_converted.csv'), index=False) """
 
 
 def main():
@@ -191,6 +191,7 @@ def main():
     preprocess_teamlogs()
     preprocess_player_logs()
     preprocess_injury_data()
+    preprocess_advanced_stats()
 
 
 if __name__ == '__main__':

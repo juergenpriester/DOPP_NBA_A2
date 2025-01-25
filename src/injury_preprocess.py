@@ -161,7 +161,8 @@ def preprocess_injury_data():
     result_df = result_df.reset_index(drop=True)
 
     players = list(set([entry["Player"] for entry in result]))
-    return players, result_df
+
+    result_df.to_csv(os.path.join(INJURY_DATA, "injury_data_cleaned.csv"), index=False)
 
 
 def preprocess_advanced_stats():
@@ -172,7 +173,7 @@ def preprocess_advanced_stats():
     )
     df_advanced["Team"] = df_advanced["Team"].astype(str)
     df_advanced["Player"] = df_advanced["Player"].astype(str)
-    return df_advanced
+    df_advanced.to_csv(os.path.join(PLAYERLOG_DATA, "player_advanced_cleaned.csv"), index=False)
 
 
 if __name__ == "__main__":
