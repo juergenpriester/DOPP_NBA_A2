@@ -121,11 +121,12 @@ def perform_grid_search(clf, param_grid, X_train, y_train):
     return best_clf
 
 
-def train_model(clf, data: pd.DataFrame, param_grid=None):
+def train_model(clf, data: pd.DataFrame, param_grid=None, include_injuries=False):
 
     # Split the data into features and target
     X = data.drop(columns=['WL', 'SEASON_YEAR', 'GAME_ID', 'GAME_DATE', 'TEAM_ID_HOME', 'TEAM_ID_AWAY'], inplace=False)
-    # X = X.drop(columns=['INJURED_PLAYERS_HOME_STATS', 'INJURED_PLAYERS_AWAY_STATS'], inplace=False)
+    if not include_injuries:
+        X = X.drop(columns=['INJURED_PLAYERS_HOME_STATS', 'INJURED_PLAYERS_AWAY_STATS'], inplace=False)
     if "Unnamed: 0" in X.columns:
         X = X.drop(columns=['Unnamed: 0'], inplace=False)
     y = data['WL']
@@ -166,12 +167,15 @@ if __name__ == '__main__':
     clf = GradientBoostingClassifier(random_state=SEED)
     # Define the parameter grid
     param_grid = {
-        'n_estimators': [200],
-        'max_depth': [10],
-        'min_samples_split': [5],
-        'min_samples_leaf': [1]
+        'n_estimators': [50, 100, 200],
+        'max_depth': [5, 10, 15],
+        'min_samples_split': [2, 5, 7],
+        'min_samples_leaf': [1, 2, 3]
     }
+    include_injuries = True
     EVAL_DIR = os.path.join(EVAL_DIR, type(clf).__name__)
+    if include_injuries:
+        EVAL_DIR = EVAL_DIR + '_with_injuries'
     check_create_dir(EVAL_DIR)
 
-    train_model(clf, data)
+    train_model(clf, data, param_grid=param_grid, include_injuries=include_injuries)
